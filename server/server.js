@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 // Read in any needed environment variables
 dotenv.config()
-const PORT = process.env.PORT ?? 3000
+const SERVER_PORT = (_DEV_ ? process.env.DEV_PORT : process.env.PORT) ?? 3000
 
 // Main express server app
 const app = new Express()
@@ -18,6 +18,6 @@ app.use((req, res, next) => {
 app.use(Express.static('public'))
 
 // Start server listening on the designated port
-app.listen(PORT, () => {
-  console.log(`Server is listening on http://localhost:${PORT}`)
+app.listen(SERVER_PORT, () => {
+  console.log(`Server is listening on http://localhost:${SERVER_PORT}`)
 })
