@@ -1,12 +1,32 @@
-import Express from 'express'
-import dotenv from 'dotenv'
+// File IO library
+import fs from 'fs'
 
-// Read in any needed environment variables
-dotenv.config()
-const SERVER_PORT = (_DEV_ ? process.env.DEV_PORT : process.env.PORT) ?? 3000
+// Server libraries
+import Express from 'express'
+import https from 'https'
+
+// Environment secrets
+import CONFIG from './CONFIG.js'
+
+// Our custom data router
+import dataRouter from './api/data.js'
+
+// Determine server port to use
+const SERVER_PORT = (CONFIG._DEV_ ? CONFIG.DEV_PORT : CONFIG.PORT)
 
 // Main express server app
 const app = new Express()
+
+// Create an SSL server if we are in dev mode
+let server = null
+if (CONFIG._DEV_) {
+  // Read in our HTTPS credentials (for testing only)
+  const key = fs.readFileSync('./server/devServerSSL/key.pem')
+  const cert = fs.readFileSync('./server/devServerSSL/cert.pem')
+
+  // Build secure server
+  server = https.createServer({ key, cert }, app)
+}
 
 // Basic logging route
 app.use((req, res, next) => {
@@ -14,10 +34,19 @@ app.use((req, res, next) => {
   next()
 })
 
+// Data routes
+app.use('/data', dataRouter)
+
 // Serve contents of the public folder
 app.use(Express.static('public'))
 
 // Start server listening on the designated port
-app.listen(SERVER_PORT, () => {
-  console.log(`Server is listening on http://localhost:${SERVER_PORT}`)
-})
+if (server) {
+  server.listen(SERVER_PORT, () => {
+    console.log(`SECURE server listening at https://localhost:${SERVER_PORT}`)
+  })
+} else {
+  app.listen(SERVER_PORT, () => {
+    console.log(`Server is listening at http://localhost:${SERVER_PORT}`)
+  })
+}

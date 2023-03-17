@@ -1,15 +1,8 @@
-import dotenv from 'dotenv'
 import { MongoClient, ServerApiVersion } from 'mongodb'
-
-// Read in configuration secrets for Mongo
-dotenv.config()
-const MONGO_HOST = process.env.MONGO_HOST ?? 'bad.host.com'
-const MONGO_USER = process.env.MONGO_USER ?? 'noUser'
-const MONGO_PW = process.env.MONGO_PW ?? 'noPassword'
-const MONGO_DB = process.env.MONGO_DB ?? 'unknownDB'
+import CONFIG from '../CONFIG.js'
 
 // Build connection URI and client object
-const uri = `mongodb+srv://${MONGO_USER}:${MONGO_PW}@${MONGO_HOST}/?retryWrites=true&w=majority`
+const uri = `mongodb+srv://${CONFIG.MONGO_USER}:${CONFIG.MONGO_PW}@${CONFIG.MONGO_HOST}/?retryWrites=true&w=majority`
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -41,7 +34,7 @@ export async function dbQuery (collectionOrCallback, callback) {
 
   try {
     // Open the database (and possibly a collection)
-    const database = client.db(MONGO_DB)
+    const database = client.db(CONFIG.MONGO_DB)
     if (typeof collectionOrCallback === 'string') {
       const collection = database.collection(collectionOrCallback)
 
